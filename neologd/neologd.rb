@@ -78,7 +78,7 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
   #raise unless id      # DEVELOPMENT MODE
   next unless id
   
-  line_expr = [yomi, id, id, mozc_cost, base].join(" ")
+  line_expr = [yomi, id, id, mozc_cost, base].join("\t")
   generic_expr = [yomi, id,  base].join(" ")
   if ALREADY[generic_expr]
     next
