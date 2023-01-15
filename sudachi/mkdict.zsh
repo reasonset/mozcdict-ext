@@ -26,4 +26,6 @@ curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/
   do
     unzip -d ../src $i
   done
-)
+) > /dev/null
+
+ruby sudachi.rb
