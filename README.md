@@ -20,6 +20,8 @@ Convert external words into Mozc system dictionary
 
 # 使い方
 
+## 生成の基本
+
 各ディレクトリの `mkdict.zsh` または `mkdict.rb` は変換された辞書を生成し、標準出力に吐く。
 
 この時以下の前提を満たす必要がある。
@@ -33,6 +35,50 @@ Convert external words into Mozc system dictionary
 
 このようにして標準出力に吐かれた内容はMozcのシステム辞書として扱うことができ、システム辞書に組み込んでビルドすれば含めることができる。
 おすすめは `src/data/dictionary_oss/dictionary09.txt` に追記することだ。
+
+## 最後の整形
+
+複数の辞書を生成した場合、複数の辞書にまたがる整形作業を加えるとより良い。
+
+`.dev.utils/uniqword.rb` は`ARGF`から辞書を読み、品詞を含めて同一の語があれば除外してSTDOUTに出力する。
+重複した語はSTDERRに吐かれる。
+
+```bash
+ruby uniqword.rb ~/dict/neologd.txt ~/dict/sudachi.txt > ~/dict/unified.txt
+```
+
+Mozcdic-UTと違い、固有名詞の生成を行うので、この作業はやったほうが良い。
+
+
+## Archlinuxの場合
+
+本プロジェクトとは別に `fcitx5-mozc-ext-neologd` というAURパッケージを用意している。
+
+ARUからこのパッケージをインストールすることで外部辞書を含む形でMozcをビルドしてインストールすることができる。
+
+なお、当該パッケージは本プロジェクトとは別のものである。
+
+# 環境変数
+
+## `$MOZC_ID_FILE`
+
+必須。MOZCの `id.def` の所在を示す。
+
+## `$WORDCLASS_ROUND`
+
+厳密に一致する品詞がない場合に、よりおおまかな品詞に丸める。
+`no`を指定するとこの処理を行わない。
+次の辞書ツールで機能する。
+
+* sudachi
+
+## `$ERROR_ON_UNEXPECTED_CLASS`
+
+品詞が不明な語がある場合にエラーを発生させる。
+デフォルトでは発生させず、`yes`を指定した場合に発生させる。
+次の辞書ツールで機能する。
+
+* sudachi
 
 # IssueとPR
 
@@ -57,12 +103,24 @@ Convert external words into Mozc system dictionary
 そのようなパッケージは、Mozcと、外部辞書として使われたリソースのライセンス・規約に従うことになるだろう。
 そのようにして配布が可能であることもまた、本ソフトウェアおよび私は保証しない。
 
+# 現在の進捗
+
+* NEologd - 機能する
+* Sudachi - 一部の品詞についてのみ生成される (実験的・開発中)
+
 # 注意事項
 
 * 本ソフトウェアによって生成される辞書のライセンス、および正当性について本ソフトウェアは一切関知しない
+
+# 特に貢献を求めているもの
+
+sudachiの`clsmap.yaml` (Sudachiの品詞分類からMozcの品詞分類への変換)
+
+`utils/dev-by-cls.rb` を使うと品詞ごとの具体的なワードに分類して`.dev.reference/sudachi-cls`以下に吐く(`.gitignore`で指定されている)ので、これを参考に品詞分類を固める作業が進行中である。
 
 # Dependency
 
 * Ruby >= 3.0
 * Zsh
 * xz(1)
+* curl(1)
