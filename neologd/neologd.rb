@@ -1,6 +1,7 @@
 #! /usr/bin/env ruby
 require 'csv'
 require 'nkf'
+require 'optparse'
 
 ID_DEF = {}
 ALREADY = {}
@@ -17,6 +18,11 @@ File.open(ENV["MOZC_ID_FILE"], "r") do |f|
   end
 end
 
+$opts = {}
+op = OptionParser.new
+op.on("-e", "--english")
+op.parse!(ARGV, into: $opts)
+
 # Read CSV each line from file.
 CSV.foreach("src/seed/user-dict-seed.csv") do |row|
   # 表層形,左文脈ID,右文脈ID,コスト,品詞1,品詞2,品詞3,品詞4,品詞5,品詞6,原形,読み,発音
@@ -27,7 +33,7 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
 
   # 読みがひらがな以外を含む場合はスキップ => 検証
   # 名詞以外の場合はスキップ => しない
-  
+
   # 「地域」をスキップ。地名は郵便番号ファイルから生成する => 踏襲する
   next if cls3 == "地域"
 
@@ -77,6 +83,10 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
 
   #raise unless id      # DEVELOPMENT MODE
   next unless id
+
+  # 英語への変換はオプションによる (デフォルトスキップ)
+  # 固有名詞は受け入れる
+  next if (!$opts[:english] && base =~ /^[a-zA-Z ]+$/ && !clsexpr.include?("固有名詞") )
   
   line_expr = [yomi, id, id, mozc_cost, base].join("\t")
   generic_expr = [yomi, id,  base].join(" ")

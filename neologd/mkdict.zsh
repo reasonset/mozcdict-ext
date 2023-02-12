@@ -24,4 +24,4 @@ mkdir -p src/seed
 
 xz -k -d -c upstream/seed/mecab-*([1]) > src/seed/user-dict-seed.csv
 
-ruby ./neologd.rb
+ruby ./neologd.rb $@

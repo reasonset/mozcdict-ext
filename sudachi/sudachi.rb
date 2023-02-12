@@ -2,12 +2,12 @@
 require 'csv'
 require 'nkf'
 require 'yaml'
+require 'optparse'
 
 ##### CONSTANTS #####
 ROUND = !(ENV["WORDCLASS_ROUND"]&.downcase == "no")
 ERROR_UNEXPECTED_CLS = ENV["ERROR_ON_UNEXPECTED_CLASS"]&.downcase == "yes"
 #####################
-
 
 CLASS_MAP = YAML.load(File.read("clsmap.yaml"))
 
@@ -25,6 +25,11 @@ File.open(ENV["MOZC_ID_FILE"], "r") do |f|
     ID_DEF[expr] = id
   end
 end
+
+$opts = {}
+op = OptionParser.new
+op.on("-e", "--english")
+op.parse!(ARGV, into: $opts)
 
 # baseball heroes,4785,4785,5000,BASEBALL HEROES,名詞,固有名詞,一般,*,*,*,ベースボールヒーローズ,BASEBALL HEROES,*,A,*,*,*,*
 # 見出し (TRIE 用),左連接ID,右連接ID,コスト,見出し (解析結果表示用), 品詞1,品詞2,品詞3,品詞4,品詞 (活用型),品詞 (活用形), 読み,正規化表記,辞書形ID,分割タイプ,A単位分割情報,B単位分割情報,※未使用
@@ -78,6 +83,10 @@ end
     if !id
       ERROR_UNEXPECTED_CLS ? abort("Unexpected Word Class #{clsexpr}") : next
     end
+
+    # 英語への変換はオプションによる (デフォルトスキップ)
+    # 固有名詞は受け入れる
+    next if (!$opts[:english] && base =~ /^[a-zA-Z ]+$/ && !clsexpr.include?("固有名詞") )
 
     line_expr = [yomi, id, id, mozc_cost, base].join("\t")
     generic_expr = [yomi, id, base].join(" ")
