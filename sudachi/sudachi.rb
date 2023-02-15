@@ -29,6 +29,7 @@ end
 $opts = {}
 op = OptionParser.new
 op.on("-e", "--english")
+op.on("-s", "--symbol")
 op.parse!(ARGV, into: $opts)
 
 # baseball heroes,4785,4785,5000,BASEBALL HEROES,名詞,固有名詞,一般,*,*,*,ベースボールヒーローズ,BASEBALL HEROES,*,A,*,*,*,*
@@ -87,6 +88,9 @@ op.parse!(ARGV, into: $opts)
     # 英語への変換はオプションによる (デフォルトスキップ)
     # 固有名詞は受け入れる
     next if (!$opts[:english] && base =~ /^[a-zA-Z ]+$/ && !clsexpr.include?("固有名詞") )
+
+    # 「きごう」で変換される記号は多すぎて支障をきたすため、除外する
+    next if (!$opts[:symbol] && yomi == "きごう" && clsexpr.include?("記号"))
 
     line_expr = [yomi, id, id, mozc_cost, base].join("\t")
     generic_expr = [yomi, id, base].join(" ")
