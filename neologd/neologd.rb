@@ -10,6 +10,8 @@ ALREADY = {}
 
 $opts = { threads: 18, slice: 8000,
           filename: "src/seed/user-dict-seed.csv",
+          fileencoding: 'UTF-8',
+          need_convert: false,
           idfile: "../../mozc/src/data/dictionary_oss/id.def"
 }
 
@@ -18,7 +20,11 @@ op.on("-e", "--english")
 op.on('-tNUM', '--threads=NUM', Integer ) { |v| $opts[:threads] = v }
 op.on('-sNUM', '--slice=NUM', Integer ) { |v| $opts[:slice] = v }
 op.on('-fVAL', '--filename=VAL', String ) { |v| $opts[:filename] = v }
-op.on('-iVAL', '--idfile=VAL', String ){ |v| $opts[:idfile] = v }
+op.on('-iVAL', '--idfile=VAL', String ) { |v| $opts[:idfile] = v }
+op.on('-eVAL', '--encoding=VAL', String ) { |v| 
+  $opts[:fileencoding] = v
+  $opts[:need_convert] = true
+}
 op.parse!(ARGV, into: $opts)
 
 unless ENV["MOZC_ID_FILE"]
@@ -40,13 +46,18 @@ THREAD_NUM=$opts[:threads]
 SLICE_NUM=$opts[:slice]
 
 # Read CSV each line from file.
-file = CSV.open($opts[:filename], "r:utf-8")
+file = CSV.open($opts[:filename], "r", encoding: $opts[:fileencoding], liberal_parsing: true)
 file.each_slice(SLICE_NUM) do |rows|
   # 表層形,左文脈ID,右文脈ID,コスト,品詞1,品詞2,品詞3,品詞4,品詞5,品詞6,原形,読み,発音
   # #24時間以内に240RT来なければ俺の嫁,1288,1288,3942,名詞,固有名詞,一般,*,*,*,#24時間以内に240RT来なければ俺の嫁,ニジュウヨジカンイナイニニヒャクヨンジュウアールティーコナケレバオレノヨメ,ニジュウヨジカンイナイニニヒャクヨンジュウアールティーコナケレバオレノヨメ
   results = Parallel.map(rows, in_threads: THREAD_NUM) do | row |
+    if $opts[:need_convert]
+      row.each do |x|
+        next if x.nil?
+        x.replace(NKF.nkf('-Lu -w', x))
+      end
+    end
     surface, lcxid, rcxid, cost, cls1, cls2, cls3, cls4, cls5, cls6, base, kana, pron = row
-
     yomi = NKF.nkf("--hiragana -w -W", kana).tr("ゐゑ", "いえ")
 
     # 読みがひらがな以外を含む場合はスキップ => 検証
