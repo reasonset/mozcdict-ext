@@ -16,7 +16,7 @@ then
     git pull
   )
 else
-  git clone 'https://github.com/neologd/mecab-ipadic-neologd.git' upstream
+  git clone --depth 1 --no-single-branch 'https://github.com/neologd/mecab-ipadic-neologd.git' upstream
 fi
 ) > /dev/null
 
