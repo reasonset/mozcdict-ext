@@ -34,13 +34,12 @@ else
 end
 
 # Load Mozc ID definition.
-File.open(MOZC_ID_FILE, "r") do |f|
+File.open(MOZC_ID_FILE, "r", encoding: $opts[:fileencoding]) do |f|
   f.each do |line|
     if $opts[:need_convert]
       line.replace(NKF.nkf('-Lu -w', line))
     end
     id, expr = line.chomp.split(" ", 2)
-    #id.defの品詞の末尾要素を取り除く
     expr = expr.split(",")
     expr.pop
     expr = expr.join(",")
@@ -48,8 +47,6 @@ File.open(MOZC_ID_FILE, "r") do |f|
   end
 end
 
-# 一番近いだろう品詞を求める。
-# 単純な判定なので、誤る場合もあります。
 def id_expr(expr)
   expr=expr.split(",")
   r=nil
@@ -84,8 +81,8 @@ SLICE_NUM=$opts[:slice]
 # Read CSV each line from file.
 file = CSV.open($opts[:filename], "r", encoding: $opts[:fileencoding], liberal_parsing: true)
 file.each_slice(SLICE_NUM) do |rows|
-  # 表層形,左文脈ID,右文脈ID,コスト,品詞1,品詞2,品詞3,品詞4,品詞5,品詞6,原形,読み,発音
-  # #24時間以内に240RT来なければ俺の嫁,1288,1288,3942,名詞,固有名詞,一般,*,*,*,#24時間以内に240RT来なければ俺の嫁,ニジュウヨジカンイナイニニヒャクヨンジュウアールティーコナケレバオレノヨメ,ニジュウヨジカンイナイニニヒャクヨンジュウアールティーコナケレバオレノヨメ
+  # naist-jdict.csv  
+  # 表層形,左文脈ID,右文脈ID, cost, 品詞1,品詞2,品詞3,品詞4,品詞5,品詞6,原形,読み,発音
   results = Parallel.map(rows, in_threads: THREAD_NUM) do | row |
     if $opts[:need_convert]
       row.each do |x|
@@ -94,17 +91,11 @@ file.each_slice(SLICE_NUM) do |rows|
       end
     end
     surface, lcxid, rcxid, cost, cls1, cls2, cls3, cls4, cls5, cls6, base, kana, pron = row
+
     yomi = NKF.nkf("--hiragana -w -W", kana).tr("ゐゑ", "いえ")
 
     # 読みがひらがな以外を含む場合はスキップ => 検証
-    # 名詞以外の場合はスキップ => しない
-
-    # 「地域」をスキップ。地名は郵便番号ファイルから生成する => 踏襲する
-    next if cls3 == "地域"
-
-    # 「名」をスキップ => しない
-
-    clsexpr = [cls1, cls2, cls3, cls4, cls5, cls6].join(",").force_encoding('UTF-8')
+    clsexpr = [cls1, cls2, cls3, cls4, cls5, cls6 ].join(",").force_encoding('UTF-8')
     #clsexpr = [cls1, cls2, cls3, cls4, cls5, cls6].join(",")
     cost = cost.to_i
 
@@ -130,10 +121,10 @@ file.each_slice(SLICE_NUM) do |rows|
     # 未知のものは無視する
     #next if not ID_DEF.has_key?(clsexpr)
     id = ID_DEF[clsexpr]
-    if id.nil?
-      STDERR.puts "id is nil. ", clsexpr
-      id = id_expr(clsexpr) if id.nil?
-    end
+    id = id_expr(clsexpr) if id.nil?
+    STDERR.puts clsexpr unless id
+    #    puts ID_DEF.has_key?(clsexpr)
+    #    puts ID_DEF.include?(clsexpr)
     #raise unless id      # DEVELOPMENT MODE
     next unless id
 
@@ -141,12 +132,13 @@ file.each_slice(SLICE_NUM) do |rows|
     # 固有名詞は受け入れる
     next if (!$opts[:english] && base =~ /^[a-zA-Z ]+$/ && !clsexpr.include?("固有名詞") )
 
-    generic_expr = [yomi, id,  base].join(" ")
+    generic_expr = [yomi, id, base].join(" ")
     if ALREADY[generic_expr]
       next
     else
       ALREADY[generic_expr] = true
-      line_expr = [yomi, id, id, mozc_cost, base]
+      #line_expr = [yomi, id, ID_DEF.key(id), mozc_cost, base]
+      line_expr = [yomi, id, id, mozc_cost, base ]
     end
   end
   results.map{ |x|
@@ -154,4 +146,3 @@ file.each_slice(SLICE_NUM) do |rows|
     puts x.join("\t")
   }
 end
-
