@@ -1,3 +1,37 @@
+# fork of [mozcdict-ext](https://github.com/reasonset/mozcdict-ext)
+# 目的
+mozcのパッケージ作成において、システム辞書として、有志が公開してくださっている辞書を含めることが目的です。  
+
+下記サイトに、まとめてくださっています。感謝です。  
+- [Merge UT Dictionaries merges multiple Mozc UT dictionaries into one and modify the costs.](https://github.com/utuhiro78/merge-ut-dictionaries)  
+このレポジトリにおいては、上記で公開されているUT辞書と、 
+- [sudachidict](https://github.com/WorksApplications/SudachiDict)  
+- [NAIST Japanese Dictionary](https://osdn.net/projects/naist-jdic/)  
+を、mozcdict-extのスクリプトをベースに、それぞれをmozc用の辞書に変換するスクリプトを公開しているリポジトリです。 
+mozcdict-extをベースにしているので、私が書いたスクリプト自体はGPLライセンスになるかと思います。  
+このスクリプトによって生成される辞書ファイルについては、GPLライセンスの適用外になります。  
+ですから、それぞれの辞書の元データのライセンスに基づいて、配布は可能になるかと思います。  
+詳細は、元データの配布者のライセンスをご確認くださいませ。
+
+# スクリプトの使い方の例
+```
+ruby mecab-naist-jdic/mecab-naist-jdic.rb -i id.def -f mecab-naist-jdic-0.6.3b-20111013/naist-jdic.csv -e euc-jp
+ruby utdict/utdict.rb -i id.def -f ut-dictionary1 ut-dictionary2 ...
+ruby sudachi/sudachi.rb -i id.def -f sudachi/src/core_lex.csv sudachi/src/notcore_lex.csv 
+```
+-iオプションでmozcのid.defファイルを指定します。  
+-fオプションで辞書ファイルを指定します。  
+naist-jdic.csvがEUC-JPで配布されていましたので、-eオプションもつけました。  
+入出力ともにUTF-8がデフォルトです。
+
+# ArchLinux向け AURパッケージ
+- [fcitx5-mozc-with-jp-dict](https://aur.archlinux.org/packages/fcitx5-mozc-with-jp-dict)  
+- [ibus-mozc-with-jp-dict](https://aur.archlinux.org/packages/ibus-mozc-with-jp-dict)  
+- [emacs-mozc-with-jp-dict](https://aur.archlinux.org/packages/emacs-mozc-with-jp-dict)  
+- [mozc-with-jp-dict-common](https://aur.archlinux.org/packages/mozc-with-jp-dict-common)    
+にて、AURパッケージを公開しました。
+
+---
 # mozcdict-ext
 
 Convert external words into Mozc system dictionary

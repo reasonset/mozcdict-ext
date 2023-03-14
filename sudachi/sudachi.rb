@@ -27,6 +27,10 @@ op.on('-tNUM', '--threads=NUM', Integer ) { |v| $opts[:threads] = v }
 op.on('-sNUM', '--slice=NUM', Integer ) { |v| $opts[:slice] = v }
 op.on('-fVAL', '--filename=VAL', String ) { |v| $opts[:filename] = v }
 op.on('-iVAL', '--idfile=VAL', String ){ |v| $opts[:idfile] = v }
+op.on('-eVAL', '--encoding=VAL', String ) { |v| 
+  $opts[:fileencoding] = v
+  $opts[:need_convert] = true
+}
 op.parse!(ARGV, into: $opts)
 
 unless ENV["MOZC_ID_FILE"]
@@ -39,8 +43,43 @@ end
 File.open(MOZC_ID_FILE, "r") do |f|
   f.each do |line|
     id, expr = line.chomp.split(" ", 2)
+    #id.defの品詞の末尾要素を取り除く
+    expr = expr.split(",")
+    expr.pop
+    expr = expr.join(",")
     ID_DEF[expr] = id
   end
+end
+
+# 一番近いだろう品詞を求める。
+# 単純な判定なので、誤る場合もあります。
+def id_expr(clsexpr)
+  expr=clsexpr.split(",")
+  r=nil
+  q=0
+  ID_DEF.keys.each do |h|
+    p=0
+    expr.each do |x|
+      next if x == "*"
+      i = h.split(",")
+      i.each do |y|
+        case y
+        when "*","自立","非自立"
+          next
+        end
+        if x == y
+          p = p + 1
+        end
+      end
+    end
+    if q < p
+      q = p
+      r = ID_DEF[h]
+    end
+  end
+  ID_DEF[clsexpr] = r if not ID_DEF.include?(clsexpr)
+  CLASS_MAP[clsexpr] = clsexpr
+  return r
 end
 
 # parallel
@@ -51,14 +90,23 @@ SLICE_NUM=$opts[:slice]
 # 見出し (TRIE 用),左連接ID,右連接ID,コスト,見出し (解析結果表示用), 品詞1,品詞2,品詞3,品詞4,品詞 (活用型),品詞 (活用形), 読み,正規化表記,辞書形ID,分割タイプ,A単位分割情報,B単位分割情報,※未使用
 
 #["src/core_lex.csv", "src/notcore_lex.csv"].each do |source_file|
-$opts[:filename].each do |source_file|
-  file = CSV.open(source_file, "r:utf-8")
+[$opts[:filename]].each do |source_file|
+  file = CSV.open(source_file, "r", encoding: $opts[:fileencoding], liberal_parsing: false)
   file.each_slice(SLICE_NUM) do |rows|
     results = Parallel.map(rows, in_threads: THREAD_NUM) do | row |
+      if $opts[:need_convert]
+        row.each do |x|
+          next if x.nil?
+          x.replace(NKF.nkf('-w', x))
+        end
+      end
+      surface, lcxid, rcxid, cost, cls1, cls2, cls3, cls4, cls5, cls6, base, kana, pron = row
       head_trie, lid, rid, cost, head_anal, cls1, cls2, cls3, cls4, cls5, cls6, kana, normal, did, dtype, adiv, bdiv = *row
 
       # 読みがかなで構成されていないものを除外する
-      next if kana =~ /[^\p{hiragana}\p{katakana}ー]/
+      #if /[^\u3040-\u309F]/ !~ yomi
+      next if /[\p{hiragana}\p{katakana}]/ !~ kana
+      #next if kana =~ /[^\p{hiragana}\p{katakana}ー]/
 
       yomi = NKF.nkf("--hiragana -w -W", kana).tr("ゐゑ", "いえ")
 
@@ -97,10 +145,13 @@ $opts[:filename].each do |source_file|
 
       # 既知のクラスの変換
       id = ID_DEF[CLASS_MAP[clsexpr]]
-
-      # 品詞が特定できないケース
-      if !id
-        ERROR_UNEXPECTED_CLS ? abort("Unexpected Word Class #{clsexpr}") : next
+      if id.nil?
+        id = id_expr(clsexpr)
+        # 品詞が特定できないケース
+        if id.nil?
+          #STDERR.puts [row, clsexpr].join("\t")
+          ERROR_UNEXPECTED_CLS ? abort("Unexpected Word Class #{clsexpr}") : next
+        end
       end
 
       # 英語への変換はオプションによる (デフォルトスキップ)
