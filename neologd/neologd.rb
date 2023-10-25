@@ -2,6 +2,7 @@
 require 'csv'
 require 'nkf'
 require 'optparse'
+require_relative '../lib/dictuitils'
 
 ID_DEF = {}
 ALREADY = {}
@@ -38,6 +39,8 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
   next if cls3 == "地域"
 
   # 「名」をスキップ => しない
+
+  next if exclude_word? yomi, base
 
   clsexpr = [cls1, cls2, cls3, cls4, cls5, cls6].join(",")
   cost = cost.to_i

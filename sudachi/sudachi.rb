@@ -3,6 +3,7 @@ require 'csv'
 require 'nkf'
 require 'yaml'
 require 'optparse'
+require_relative '../lib/dictuitils'
 
 ##### CONSTANTS #####
 ROUND = !(ENV["WORDCLASS_ROUND"]&.downcase == "no")
@@ -25,6 +26,8 @@ File.open(ENV["MOZC_ID_FILE"], "r") do |f|
     ID_DEF[expr] = id
   end
 end
+
+load_exclude_dict
 
 $opts = {}
 op = OptionParser.new
@@ -59,6 +62,8 @@ op.parse!(ARGV, into: $opts)
 
     clsexpr = [cls1, cls2, cls3, cls4, cls5, cls6].join(",")
     cost = cost.to_i
+
+    next if exclude_word? yomi, base
 
     # コスト計算の処理はMozc-UTに倣っている
     mozc_cost = case
