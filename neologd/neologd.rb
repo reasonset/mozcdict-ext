@@ -19,6 +19,8 @@ File.open(ENV["MOZC_ID_FILE"], "r") do |f|
   end
 end
 
+load_exclude_dict
+
 $opts = {}
 op = OptionParser.new
 op.on("-e", "--english")
