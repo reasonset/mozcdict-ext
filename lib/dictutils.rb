@@ -1,8 +1,8 @@
 def load_exclude_dict
   $config_dir = File.join((ENV["XDG_CONFIG_HOME"] || [ENV["HOME"], ".config"]), "mozcdic-ext")
   $exclude_dict = []
-  if File.exist? File.join CONFIG_DIR, "exclude.txt"
-    exd = File.read File.join CONFIG_DIR, "exclude.txt"
+  if File.exist? File.join $config_dir, "exclude.txt"
+    exd = File.read File.join $config_dir, "exclude.txt"
     exd.each_line do |line|
       x, y = line.chomp.split("\t")
       next if !x || !y || x.empty? || y.empty?
