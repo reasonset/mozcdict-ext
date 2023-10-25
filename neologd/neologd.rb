@@ -2,7 +2,7 @@
 require 'csv'
 require 'nkf'
 require 'optparse'
-require_relative '../lib/dictuitils'
+require_relative '../lib/dictutils'
 
 ID_DEF = {}
 ALREADY = {}

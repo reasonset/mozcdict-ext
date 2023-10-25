@@ -3,7 +3,7 @@ require 'csv'
 require 'nkf'
 require 'yaml'
 require 'optparse'
-require_relative '../lib/dictuitils'
+require_relative '../lib/dictutils'
 
 ##### CONSTANTS #####
 ROUND = !(ENV["WORDCLASS_ROUND"]&.downcase == "no")
