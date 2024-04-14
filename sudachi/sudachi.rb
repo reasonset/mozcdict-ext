@@ -30,6 +30,7 @@ end
 load_exclude_dict
 
 $opts = {}
+load_global_config
 op = OptionParser.new
 op.on("-e", "--english")
 op.on("--english-proper")
@@ -95,15 +96,15 @@ op.parse!(ARGV, into: $opts)
     end
 
     # --no-proper 時, 固有名詞はスキップ
-    next if (!$opts[:"no-proper"] && clsexpr.include?("固有名詞"))
+    next if check_proper clsexpr
 
     # 英語への変換はオプションによる (デフォルトスキップ)
     # --english-properが与えられている場合、固有名詞は受け入れる
-    next if (!$opts[:english] && base =~ /^[\p{ascii}\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}]+$/ && (!$opts[:"english-proper"] || !clsexpr.include?("固有名詞")))
+    next if check_english base, clsexpr
 
     # 全角英語への変換はオプションによる (デフォルトスキップ)
     # オプションがなければ固有名詞もスキップする
-    next if (!$opts[:"fullwidth-english"] && base =~ /^[\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}\p{In_Halfwidth_and_Fullwidth_Forms}]+$/) && (!$opts[:"fullwidth-english-proper"] || !clsexpr.include?("固有名詞"))
+    next if check_fullwidth_english base, clsexpr
 
     # 「きごう」で変換される記号は多すぎて支障をきたすため、除外する
     next if (!$opts[:symbol] && yomi == "きごう" && clsexpr.include?("記号"))
