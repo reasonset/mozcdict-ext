@@ -90,8 +90,26 @@ ARUからこのパッケージをインストールすることで外部辞書�
 
 ## -e / --english
 
-通常、このツールは「固有名詞以外の英単語への変換」を除外する。
-`-e` あるいは `--english` オプションをつけると、固有名詞ではない英語の変換結果を許容する。
+通常、このツールは「英語への変換」を除外する。
+`-e` あるいは `--english` オプションをつけると、英語の変換結果を許容する。
+
+## --english-proper
+
+`--english`をつけておらず、`--english-proper`をつけた場合、英語は固有名詞である場合のみ許容する。
+
+## -P / --no-proper
+
+固有名詞を除外する。
+
+## -w / --fullwidth-english
+
+全角文字と半角カナへの変換を除外しない。
+
+より正確には通常はOnigmoの正規表現 `/^[\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}\p{In_Halfwidth_and_Fullwidth_Forms}]+$/` にマッチする場合除外されるが、これによる除外を停止する。
+
+## --fullwidth-english-proper
+
+`--fullwidth-english`をつけていない場合に固有名詞のみ許容する。
 
 ## -s / --symbol
 

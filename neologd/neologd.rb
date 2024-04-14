@@ -24,6 +24,10 @@ load_exclude_dict
 $opts = {}
 op = OptionParser.new
 op.on("-e", "--english")
+op.on("--english-proper")
+op.on("-P", "--no-proper")
+op.on("-w", "--fullwidth-english")
+op.on("--fullwidth-english-proper")
 op.parse!(ARGV, into: $opts)
 
 # Read CSV each line from file.
@@ -89,10 +93,17 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
   #raise unless id      # DEVELOPMENT MODE
   next unless id
 
+  # --no-proper 時, 固有名詞はスキップ
+  next if (!$opts[:"no-proper"] && clsexpr.include?("固有名詞"))
+
   # 英語への変換はオプションによる (デフォルトスキップ)
-  # 固有名詞は受け入れる
-  next if (!$opts[:english] && base =~ /^[a-zA-Z ]+$/ && !clsexpr.include?("固有名詞") )
-  
+  # --english-properが与えられている場合、固有名詞は受け入れる
+  next if (!$opts[:english] && base =~ /^[\p{ascii}\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}]+$/ && (!$opts[:"english-proper"] || !clsexpr.include?("固有名詞")))
+
+  # 全角英語への変換はオプションによる (デフォルトスキップ)
+  # オプションがなければ固有名詞もスキップする
+  next if (!$opts[:"fullwidth-english"] && base =~ /^[\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}\p{In_Halfwidth_and_Fullwidth_Forms}]+$/) && (!$opts[:"fullwidth-english-proper"] || !clsexpr.include?("固有名詞"))
+
   line_expr = [yomi, id, id, mozc_cost, base].join("\t")
   generic_expr = [yomi, id,  base].join(" ")
   if ALREADY[generic_expr]
