@@ -1,4 +1,4 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env ruby
 require 'csv'
 require 'nkf'
 require 'optparse'
@@ -106,7 +106,7 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
   next if check_fullwidth_english base, clsexpr
 
   line_expr = [yomi, id, id, mozc_cost, base].join("\t")
-  generic_expr = [yomi, id,  base].join(" ")
+  generic_expr = [yomi, id, base].join(" ")
   if ALREADY[generic_expr]
     next
   else
