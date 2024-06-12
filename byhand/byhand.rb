@@ -16,12 +16,14 @@ end
 COST = 6500
 
 File.foreach("dict.csv") do |line|
+  next if line =~ /^\s*\#/
   # 表記 読み 品詞
   base, yomi, cls = line.chomp.split("\t")
 
   # byhand品詞からMozc品詞への変換
   # 複数のMozc品詞にマップされることもある
   clses = ID_MAP[cls]
+  clses ||= [cls]
   clses.each do |cls|
     # Mozcの品詞IDを取得する
     id = ID_DEF[cls]
