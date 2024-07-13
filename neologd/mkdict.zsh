@@ -8,17 +8,12 @@ then
   exit 1
 fi
 
-(
-if [[ -e upstream ]]
+if [[ ! -e "upstream/seed" ]]
 then
-  (
-    cd upstream
-    git pull
-  )
-else
-  git clone 'https://github.com/neologd/mecab-ipadic-neologd.git' upstream
+  git submodule init
+  git submodule sync
+  git submodule update
 fi
-) > /dev/null
 
 mkdir -p src/seed
 

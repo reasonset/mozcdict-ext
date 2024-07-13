@@ -1,0 +1,3 @@
+[submodule "neologd/upstream"]
+	path = neologd/upstream
+	url = https://github.com/neologd/mecab-ipadic-neologd.git

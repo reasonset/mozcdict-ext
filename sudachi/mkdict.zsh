@@ -17,12 +17,19 @@ mkdir src
 #print http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/20230110/core_lex.zip
 #print http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$date/core_lex.zip
 
-curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$latest_date/core_lex.zip" -o upstream/core_lex.zip
-curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$latest_date/notcore_lex.zip" -o upstream/notcore_lex.zip
+if [[ ! -e upstream/core_lex_${latest_date}.zip ]]
+then
+  curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$latest_date/core_lex.zip" -o upstream/core_lex_${latest_date}.zip
+fi
+
+if [[ ! -e upstream/notcore_lex_${latest_date}.zip ]]
+then
+  curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$latest_date/notcore_lex.zip" -o upstream/notcore_lex.zip
+fi
 
 (
   cd upstream
-  for i in *.zip
+  for i in *_${latest_date}.zip
   do
     unzip -d ../src $i
   done
