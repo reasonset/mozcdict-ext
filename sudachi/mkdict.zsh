@@ -24,7 +24,7 @@ fi
 
 if [[ ! -e upstream/notcore_lex_${latest_date}.zip ]]
 then
-  curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$latest_date/notcore_lex.zip" -o upstream/notcore_lex.zip
+  curl -s "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/$latest_date/notcore_lex.zip" -o upstream/notcore_lex_${latest_date}.zip
 fi
 
 (
