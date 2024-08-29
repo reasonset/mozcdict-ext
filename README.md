@@ -4,7 +4,8 @@ Convert external words into Mozc system dictionary
 
 # 概要
 
-本ツール群は Mozc-UT (Mozcdic-UT) を失ったことによる損失を埋めるための「緊急避難」として使うために作られた。
+本ツール群は当初 Mozc-UT (Mozcdic-UT) を失ったことによる損失を埋めるための「緊急避難」として使うために作られた。
+現在はMozc-UTとは異なるアプローチによって、より快適な変換環境を構築することを目指している。
 
 本ツール群はMozc外部のリソースからMozcシステム辞書を構築する。
 これをMozcに組み込んでビルドすることにより、Mozcの語彙力を増加させることができる。
@@ -186,3 +187,30 @@ sudachiの`clsmap.yaml` (Sudachiの品詞分類からMozcの品詞分類への�
 * Zsh
 * xz(1)
 * curl(1)
+* Git (Submodules)
+
+# 辞書について
+
+## neologd
+
+mecab-ipadic-NEologdをベースとした辞書である。
+
+## sudachi
+
+形態素解析ソフトウェアSudachiの辞書を流用したものである。
+
+名詞以外についても利用する予定だが、現在停滞中である。
+
+## byhand
+
+neologd, sudachiを使っても変換できない、もしくは変換が困難な語について手動で編纂されている辞書である。
+
+原則として国語小辞典に掲載されるような一般語のみを収録し、固有名詞は収録しない。
+
+登録のための管理システムは開発中であり、現時点では追加してほしい語はissueにて申請してほしい。
+
+## Mozc Common User Dict
+
+[Mozc Common User Dict](https://github.com/reasonset/mozc-common-user-dict)は本プロジェクトを補完する一般語のユーザー辞書である。
+
+byhandへの収録が何らかの理由で難しいものはこちらに収録される。
