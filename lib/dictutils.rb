@@ -39,3 +39,7 @@ end
 def check_fullwidth_english base, clsexpr
   (!$opts[:"fullwidth-english"] && base =~ /^[\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}\p{In_Halfwidth_and_Fullwidth_Forms}]+$/) && (!$opts[:"fullwidth-english-proper"] || !clsexpr.include?("固有名詞"))
 end
+
+def check_containing_fullwidth_english base, clsexpr
+  $opts[:"exclude-containing-fullwidth-english"] && base =~ /\p{In_Halfwidth_and_Fullwidth_Forms}/
+end

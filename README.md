@@ -13,17 +13,14 @@ Convert external words into Mozc system dictionary
 本ソフトウェアにそのようにして生成された辞書は *含まない* 。
 また、 *Mozc本体も含まない* 。
 
-このようなソフトウェアにするのはいくつか理由があるが、まず本ソフトウェアが、東風フォント事件におけるさざなみゴシックのような「緊急避難」であることを理解してほしい。
-つまり、何年かかるかは分からないが、安定した開発が行われる、優れたかな漢字変換ソフトウェア及び辞書が誕生するまでの「つなぎ」である。
-
-その意味で「つなぎ」として機能しやすいようにこのようなソフトウェアにした。
-これは、Mozc以外のソフトウェアからもMozcシステム辞書からの変換とすることで利用しやすいようにし、かな漢字変換ソフトウェアの発展を促す意味もある。
+もとは緊急回避的な「つなぎ」として作られたソフトウェアであったが、現在はMozc-UTとは少し異なる方針のもとで開発されている。
 
 Mozcdic-UTとの大きな違いは以下になる
 
 * オープンなプロジェクトであり、ライセンスがGPL v3である
 * ソフトウェアは辞書生成のためのツールであり、生成された辞書ではない
 * Mozcdic-UTは一般名詞のみを対象とするが、Mozcdict-EXTは品詞を制限しない
+* web辞書コンバータ以外に人の手で編纂されたByHand辞書を持つ
 
 # 使い方
 
@@ -55,7 +52,6 @@ ruby uniqword.rb ~/dict/neologd.txt ~/dict/sudachi.txt > ~/dict/unified.txt
 ```
 
 Mozcdic-UTと違い、固有名詞の生成を行うので、この作業はやったほうが良い。
-
 
 ## Archlinuxの場合
 
@@ -102,13 +98,17 @@ ARUからこのパッケージをインストールすることで外部辞書�
 
 固有名詞を除外する。
 
-## -w / --fullwidth-english
+## -w / --fullwidth-english (neologd, sudachi)
 
-全角文字と半角カナへの変換を除外しない。
+全角英数と半角カナへの変換を除外しない。
 
 より正確には通常はOnigmoの正規表現 `/^[\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}\p{In_Halfwidth_and_Fullwidth_Forms}]+$/` にマッチする場合除外されるが、これによる除外を停止する。
 
-## --fullwidth-english-proper
+## -W / --exclude-containing-fullwidth-english (byhand)
+
+全角英数あるいは半角カナが含まれる場合は除外する。
+
+## --fullwidth-english-proper (neologd, sudachi)
 
 `--fullwidth-english`をつけていない場合に固有名詞のみ許容する。
 
@@ -150,6 +150,13 @@ fullwidth-english: true
 ただ、私は既にかなり手出ししている中で善意で本ソフトウェアを作っていることを理解してほしい。
 つまり、IssueやPull Requestにまで手が回るかは分からない。
 (少なくとも、なるべく対応したいとは思っている。)
+
+# ByHand辞書への語彙追加と欠如している語彙の報告
+
+最新のMozcと、本ソフトウェアのすべての辞書を有効にした状態で変換できない語があれば、[Mozcdict Ext 語彙欠如報告](https://mozc.chienomi.org)にて申請してほしい。
+
+同ページから申請できないものについてはissueにて報告して欲しい。
+また、具体的なMozc品詞を指定できる場合も、同ページではなくissueを立てて欲しい。
 
 # ライセンスとパッケージング
 
@@ -206,8 +213,6 @@ mecab-ipadic-NEologdをベースとした辞書である。
 neologd, sudachiを使っても変換できない、もしくは変換が困難な語について手動で編纂されている辞書である。
 
 原則として国語小辞典に掲載されるような一般語のみを収録し、固有名詞は収録しない。
-
-登録のための管理システムは開発中であり、現時点では追加してほしい語はissueにて申請してほしい。
 
 ## Mozc Common User Dict
 

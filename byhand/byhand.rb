@@ -1,8 +1,14 @@
 #!/usr/bin/env ruby
 require 'yaml'
 require_relative './clsmap.rb'
+require 'optparse'
 
 ID_DEF = {}
+
+$opts = {}
+op = OptionParser.new
+op.on("-W", "--exclude-containing-fullwidth-english")
+op.parse!(ARGV, into: $opts)
 
 # Load Mozc ID definition.
 File.open(ENV["MOZC_ID_FILE"], "r") do |f|

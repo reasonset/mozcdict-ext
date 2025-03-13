@@ -36,6 +36,7 @@ op.on("-e", "--english")
 op.on("--english-proper")
 op.on("-P", "--no-proper")
 op.on("-w", "--fullwidth-english")
+op.on("-W", "--exclude-containing-fullwidth-english")
 op.on("--fullwidth-english-proper")
 op.on("-s", "--symbol")
 op.parse!(ARGV, into: $opts)
@@ -105,6 +106,9 @@ op.parse!(ARGV, into: $opts)
     # 全角英語への変換はオプションによる (デフォルトスキップ)
     # オプションがなければ固有名詞もスキップする
     next if check_fullwidth_english base, clsexpr
+
+    # 全角英数が含まれる場合はスキップする (デフォルト含む)
+    next if check_containing_fullwidth_english base, clsexpr
 
     # 「きごう」で変換される記号は多すぎて支障をきたすため、除外する
     next if (!$opts[:symbol] && yomi == "きごう" && clsexpr.include?("記号"))

@@ -28,6 +28,7 @@ op.on("-e", "--english")
 op.on("--english-proper")
 op.on("-P", "--no-proper")
 op.on("-w", "--fullwidth-english")
+op.on("-W", "--exclude-containing-fullwidth-english")
 op.on("--fullwidth-english-proper")
 op.parse!(ARGV, into: $opts)
 
@@ -104,6 +105,9 @@ CSV.foreach("src/seed/user-dict-seed.csv") do |row|
   # 全角英語への変換はオプションによる (デフォルトスキップ)
   # オプションがなければ固有名詞もスキップする
   next if check_fullwidth_english base, clsexpr
+
+  # 全角英数が含まれる場合はスキップする (デフォルト含む)
+  next if check_containing_fullwidth_english base, clsexpr
 
   line_expr = [yomi, id, id, mozc_cost, base].join("\t")
   generic_expr = [yomi, id, base].join(" ")
