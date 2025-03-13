@@ -98,13 +98,17 @@ ARUからこのパッケージをインストールすることで外部辞書�
 
 固有名詞を除外する。
 
-## -w / --fullwidth-english
+## -w / --fullwidth-english (neologd, sudachi)
 
-全角文字と半角カナへの変換を除外しない。
+全角英数と半角カナへの変換を除外しない。
 
 より正確には通常はOnigmoの正規表現 `/^[\p{Symbol}\p{In_CJK_Symbols_and_Punctuation}\p{Punctuation}\p{White_Space}\p{In_Halfwidth_and_Fullwidth_Forms}]+$/` にマッチする場合除外されるが、これによる除外を停止する。
 
-## --fullwidth-english-proper
+## -W / --exclude-containing-fullwidth-english (byhand)
+
+全角英数あるいは半角カナが含まれる場合は除外する。
+
+## --fullwidth-english-proper (neologd, sudachi)
 
 `--fullwidth-english`をつけていない場合に固有名詞のみ許容する。
 

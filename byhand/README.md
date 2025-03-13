@@ -20,4 +20,4 @@ domain specificな語でも、「運ゲー」のように転じて広く使わ�
 
 # Contribute
 
-専用のシステムを組みたいと思っているが、時間がないのでまずはissueベースで対応したい。
+[語彙欠如報告](https://mozc.chienomi.org/)が便利。
