@@ -3,6 +3,13 @@ require 'yaml'
 require_relative '../lib/dictutils'
 
 ID_MAP = YAML.load(File.read "def.yaml")
+COST = 6500 # Default cost
+COSTS = {
+  "BINDED" => 5000,
+  "HIGH" => 5500,
+  "LOW" => 8000,
+  "VERY_LOW" => 9500
+}
 
 BYHAND_CLSMAP = {
   "一段動詞" => ->(wp) {
@@ -21,9 +28,10 @@ BYHAND_CLSMAP = {
 }
 
 class WordProcessor
-  def initialize(yomi, base, cls)
+  def initialize(yomi, base, cls, cost)
     @base = base
     @yomi = yomi
+    @cost = cost
     if cls.include?("/")
       @spec_cls = cls.sub(%r:/.*:, "")
       @excludes = cls.sub(%r:.*/:, "").split(",")
@@ -36,7 +44,7 @@ class WordProcessor
   def wordout(c, remove: "", add: "")
     conjugation = c.split(",")[5]
     return if @excludes.include? conjugation
-    puts [@yomi.delete_suffix(remove) + add, ID_DEF[c], ID_DEF[c], COST, @base.delete_suffix(remove) + add].join("\t")
+    puts [@yomi.delete_suffix(remove) + add, ID_DEF[c], ID_DEF[c], @cost, @base.delete_suffix(remove) + add].join("\t")
   end
 
   def dg(cls)
@@ -47,28 +55,30 @@ class WordProcessor
   alias :w :wordout
 end
 
-def process_cls(yomi, base, cls)
+def process_cls(yomi, base, cls, priority = "DEFAULT")
+  current_cost = COSTS[priority] || COST
+
   word_classes = nil
   scls = cls.sub(%r:/.*:, "")
+
   if BYHAND_CLSMAP[scls]
-    wp = WordProcessor.new(yomi, base, cls)
+    wp = WordProcessor.new(yomi, base, cls, current_cost)
     wp.dg scls
   elsif ID_MAP[cls]
     # 単純変換
     ID_MAP[cls].each do |cls|
       # Mozcの品詞IDを取得する
       id = ID_DEF[cls]
- 
       
       next if check_containing_fullwidth_english base, cls
       # 出力
-      puts [yomi, id, id, COST, base].join("\t")
+      puts [yomi, id, id, current_cost, base].join("\t")
     end
   else
     # 未知の品詞 (未作業、もしくは直接指定)
     if check_containing_fullwidth_english(base, cls)
       id = ID_DEF[cls]
-      puts [yomi, id, id, COST, base].join("\t")
+      puts [yomi, id, id, current_cost, base].join("\t")
     end
   end
 end
